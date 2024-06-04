@@ -1,0 +1,78 @@
+---
+title: "How to extract coordinates and sequence from a fasta file"
+output: html_document
+date: "2024-06-04"
+always_allow_html: true
+editor_options: 
+  chunk_output_type: console
+---
+
+## Installing Rust
+
+First you need to have an updated Rust installation. Go to this [site](https://www.rust-lang.org/tools/install) to learn how to install Rust.
+
+
+## Installing rustytools
+
+You will need to have the devtools package installed...
+
+```{r, eval=F}
+devtools::install_github("furlan-lab/rustytools")
+```
+
+
+## Running a tool to extract consensus sequence data
+
+Loading libraries
+```{r, dpi=300, fig.height=4, fig.width = 6}
+rm(list=ls())
+suppressPackageStartupMessages({
+  library(rustytools)
+})
+
+outpath<-"/tmp"
+root<-file.path(.libPaths(), "rustytools/extdata/test")
+```
+
+```{r}
+library(rextendr)
+library(seqinr)
+rust_sitrep()
+fa<-read.fasta(file = "/Volumes/furlan_s/primerseq/st_consensus/GENDX_HLA_Mix1_S1_L001_t1000.fa", 
+           seqtype = "DNA", as.string = TRUE, forceDNAtolower = FALSE,
+           set.attributes = TRUE)
+x<-fa[[1]][1]
+rm(fa)
+nchar(x)
+library(stringr)
+
+find_cuts<-function(len, n){
+ cut<-ceiling(len/n)
+ c(seq(1, len, by = cut), len)
+}
+
+# find_cuts(100030, 100)
+# find_cuts(nchar(x), 10000)
+
+split_string<-function(string, n){
+  cuts<-find_cuts(nchar(string), n)
+  string<-sapply(1:(length(cuts)-1), function(n){
+    substring(string, cuts[n], cuts[n+1])
+  })
+  return(list(cuts, string))
+}
+
+xs<-split_string(x, 10000)
+
+res<-pbmcapply::pbmclapply(1:length(xs[[1]]), function(n){
+  getconsensus( xs[[2]][n], xs[[1]][n])
+})
+
+
+
+```
+
+## Appendix
+```{r Appendix}
+sessionInfo()
+```
