@@ -54,20 +54,20 @@ get_consensus<-function(fasta, splits = 10000, cores=1, genome="hg38"){
                  set.attributes = TRUE)
   message("Fasta ingestion complete")
   message("Building sequence info")
-  seqinfo<-GenomeInfoDb::Seqinfo(names(fa), seqlengths=sapply(1:length(fa), function(n) nchar(fa[[n]][1])), isCircular=NA, genome=genome)
+  seqinfo<-Seqinfo(names(fa), seqlengths=sapply(1:length(fa), function(n) nchar(fa[[n]][1])), isCircular=NA, genome=genome)
   # x<-fa[[1]][1]
   allres<-lapply(1:length(fa), function(i){
     message(paste0("Processing ", nchar(fa[[i]][1]), " bases from ", names(fa)[i]))
     xs<-split_string(fa[[i]][1], splits)
-    res<-pbmcapply::pbmclapply(1:length(xs[[2]]), function(j){
+    res<-pbmclapply(1:length(xs[[2]]), function(j){
       getconsensus( xs[[2]][j], xs[[1]][j])
     }, mc.cores = cores)
     res<-unlist(res)
     if(length(res)>0){
       df<-t(data.frame(strsplit(res, "_")))
-      GenomicRanges::GRanges(seqnames = rep(names(fa)[i], nrow(df)),
-                             ranges = IRanges::IRanges(start = as.numeric(df[,1]), end = as.numeric(df[,2])),
-                             mcols = S4Vectors::DataFrame(sequence=df[,3]), seqinfo = seqinfo)
+      GRanges(seqnames = rep(names(fa)[i], nrow(df)),
+                             ranges = IRanges(start = as.numeric(df[,1]), end = as.numeric(df[,2])),
+                             mcols = DataFrame(sequence=df[,3]), seqinfo = seqinfo)
     }
   })
   allres <- do.call(c, allres)
