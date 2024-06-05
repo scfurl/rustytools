@@ -3,7 +3,7 @@ pkgdown::clean_site(pkg = ".")
 pkgdown::init_site(pkg = ".")
 pkgdown::build_home_index()
 pkgdown::preview_page("index.html")
-pkgdown::build_article(name = "HowTo")
+pkgdown::build_article(name = "getConsensus")
 pkgdown::preview_page("articles/getConsensus.html")
 
 # cleanup start -----------------------------------------------------------
@@ -23,7 +23,7 @@ pkgdown::preview_site(path = "/reference")
 
 # rticles -----------------------------------------------------------------
 options(rmarkdown.html_vignette.check_title = FALSE)
-pkgdown::build_article("HowTo")
+pkgdown::build_article("getConsensus")
 pkgdown::build_articles_index()
 pkgdown::build_articles()
 pkgdown::preview_site(path = "/articles")
