@@ -46,7 +46,7 @@ split_string<-function(string, n){
 #' @references This documentation was written by ChatGPT v4o - OpenAI, conversation with the author, 6-5-2024.
 #' @export
 
-get_consensus<-function(fasta, splits = 10000, cores=1, genome="hg38"){
+get_consensus<-function(fasta, splits = 10000, cores=1, genome="hg38", test_with_n = NULL){
   if(!file.exists(fasta)) {stop("Cannot find fasta")}
   message(paste0("Reading fasta: ", fasta, "..."))
   fa<-seqinr::read.fasta(file = fasta,
@@ -54,9 +54,16 @@ get_consensus<-function(fasta, splits = 10000, cores=1, genome="hg38"){
                  set.attributes = TRUE)
   message("Fasta ingestion complete")
   message("Building sequence info")
-  seqinfo<-Seqinfo(names(fa), seqlengths=sapply(1:length(fa), function(n) nchar(fa[[n]][1])), isCircular=NA, genome=genome)
+  seqinfo<-GenomeInfoDb::Seqinfo(names(fa), seqlengths=sapply(1:length(fa), function(n) nchar(fa[[n]][1])), isCircular=NA, genome=genome)
   # x<-fa[[1]][1]
-  allres<-lapply(1:length(fa), function(i){
+
+  if(is.null(test_with_n)){
+    final_n = length(fa)
+  } else {
+    if(length(test_with_n)>1){stop("test_with_n must be an integer vector of length 1")}
+    final_n = as.integer(test_with_n)
+  }
+  allres<-lapply(1:final_n, function(i){
     message(paste0("Processing ", nchar(fa[[i]][1]), " bases from ", names(fa)[i]))
     xs<-split_string(fa[[i]][1], splits)
     res<-pbmclapply(1:length(xs[[2]]), function(j){
