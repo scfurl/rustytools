@@ -8,6 +8,13 @@
 \description{
 not that complicated
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://scfurl.github.io/rustytools/}
+}
+
+}
 \author{
 \strong{Maintainer}: Scott Furlan \email{scottfurlan@gmail.com} (\href{https://orcid.org/0000-0003-3007-9840}{ORCID})
 

@@ -2,4 +2,10 @@
 
 export(get_consensus)
 export(getconsensus)
+importFrom(GenomeInfoDb,Seqinfo)
+importFrom(GenomicRanges,GRanges)
+importFrom(IRanges,IRanges)
+importFrom(S4Vectors,DataFrame)
+importFrom(pbmcapply,pbmclapply)
+importFrom(seqinr,read.fasta)
 useDynLib(rustytools, .registration = TRUE)

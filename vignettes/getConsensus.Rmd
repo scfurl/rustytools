@@ -17,7 +17,7 @@ First you need to have an updated Rust installation. Go to this [site](https://w
 You will need to have the devtools package installed...
 
 ```{r, eval=F}
-devtools::install_github("furlan-lab/rustytools")
+devtools::install_github("scfurl/rustytools")
 ```
 
 
@@ -37,11 +37,17 @@ suppressPackageStartupMessages({
 This function will process a fasta file that has been processed using a tool such as samtools consensus.  The function will find all regions (subsequences) of the fasta that have sequence (A, C, T, G) and output a granges object containing the features and their sequences.  It is invoked as follows:
 
 ```{r}
-fasta="~/Desktop/GENDX_HLA_Mix1_S1_L001_t1000.fa"
-tfasta="~/Desktop/test.fa"
+root<-file.path(.libPaths(), "rustytools/extdata")
+tfasta=file.path(root, "test.fa")
 results<-get_consensus(tfasta, cores=1, split=1)
-results<-get_consensus(fasta, cores=1, split=10000)
-debug(get_consensus)
+results
+```
+
+In the above toy example we use the split argument to specify how many chunks to break the sequence into for parallel processing.  In this case it doesn't make sense to split the sequence into chunks because the example only has about 500-600 bases for each contig.  When running this on real fasta sequence from a large genome, one would want to leverage parallel processing.  In this next block we show how to run get_consensus on a big fasta.  One can specify the name of the genome using the genome argument.  For hg38, we find that this takes about 2-6 minutes per chromosome when using 16 cores on an intel iMac.  We recommend splitting the fasta contigs into 10000 chunks as below.
+
+```{r, eval=F}
+fasta="abigfasta.fa"
+results<-get_consensus(fasta, cores=16, split=10000, genome="hg38")
 ```
 
 ## Appendix

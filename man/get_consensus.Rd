@@ -2,10 +2,39 @@
 % Please edit documentation in R/rustytools.R
 \name{get_consensus}
 \alias{get_consensus}
-\title{Get consensus}
+\title{Get Consensus Sequences from a FASTA File}
 \usage{
-get_consensus(str, add_int)
+get_consensus(fasta, splits = 10000, cores = 1, genome = "hg38")
+}
+\arguments{
+\item{fasta}{A character string specifying the path to the FASTA file.}
+
+\item{splits}{An integer specifying the number of segments to split the sequence into for processing. Default is 10,000.}
+
+\item{cores}{An integer specifying the number of cores to use for parallel processing. Default is 1.}
+
+\item{genome}{A character string specifying the genome version for sequence information. Default is "hg38".}
+}
+\value{
+A \code{GRanges} object containing the consensus sequences with their genomic ranges and associated sequence information.
 }
 \description{
-It will take a string and print the coordinates of every repeated character substring made up of either "ACGT".
+This function reads a DNA sequence from a given FASTA file, splits the sequences for parallel processing,
+and retrieves consensus sequences for each split segment.
+}
+\details{
+The function reads the input FASTA file, splits each sequence into smaller segments for parallel processing,
+and retrieves consensus sequences for each segment. The results are combined into a \code{GRanges} object.
+}
+\examples{
+\dontrun{
+  # Example usage:
+  fasta_file <- "path/to/your/file.fasta"
+  consensus <- get_consensus(fasta_file, splits = 5000, cores = 2, genome = "hg38")
+  print(consensus)
+}
+
+}
+\references{
+This documentation was written by ChatGPT v4o - OpenAI, conversation with the author, 6-5-2024.
 }

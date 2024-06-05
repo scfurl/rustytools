@@ -1,15 +1,3 @@
-#' Get consensus
-#' @description It will take a string and print the coordinates of every repeated character substring made up of either "ACGT".
-#' @importFrom GenomicRanges GRanges
-#' @importFrom IRanges IRaanges
-#' @importFrom S4Vectors DataFrame
-#' @export
-#'
-
-
-get_consensus<-function(str, add_int){
-  getconsensus(str, add_int)
-}
 
 
 find_cuts<-function(len, n){
@@ -26,18 +14,42 @@ split_string<-function(string, n){
   return(list(cuts, string))
 }
 
-#' Get consensus from fasta
-#' @description This function will process a fasta file that has been processed using a tool such as samtools consensus.  The function will find all regions (subsequences) of the fasta that have sequence (A, C, T, G) and output a granges object containing the features and their sequences.
-#' @importFrom GenomicRanges GRanges
-#' @importFrom IRanges IRaanges
-#' @importFrom S4Vectors DataFrame
-#' @export
+#' Get Consensus Sequences from a FASTA File
 #'
+#' This function reads a DNA sequence from a given FASTA file, splits the sequences for parallel processing,
+#' and retrieves consensus sequences for each split segment.
+#'
+#' @param fasta A character string specifying the path to the FASTA file.
+#' @param splits An integer specifying the number of segments to split the sequence into for processing. Default is 10,000.
+#' @param cores An integer specifying the number of cores to use for parallel processing. Default is 1.
+#' @param genome A character string specifying the genome version for sequence information. Default is "hg38".
+#'
+#' @return A \code{GRanges} object containing the consensus sequences with their genomic ranges and associated sequence information.
+#'
+#' @details The function reads the input FASTA file, splits each sequence into smaller segments for parallel processing,
+#'          and retrieves consensus sequences for each segment. The results are combined into a \code{GRanges} object.
+#'
+#' @examples
+#' \dontrun{
+#'   # Example usage:
+#'   fasta_file <- "path/to/your/file.fasta"
+#'   consensus <- get_consensus(fasta_file, splits = 5000, cores = 2, genome = "hg38")
+#'   print(consensus)
+#' }
+#'
+#' @importFrom seqinr read.fasta
+#' @importFrom GenomeInfoDb Seqinfo
+#' @importFrom pbmcapply pbmclapply
+#' @importFrom GenomicRanges GRanges
+#' @importFrom IRanges IRanges
+#' @importFrom S4Vectors DataFrame
+#' @references This documentation was written by ChatGPT v4o - OpenAI, conversation with the author, 6-5-2024.
+#' @export
 
 get_consensus<-function(fasta, splits = 10000, cores=1, genome="hg38"){
   if(!file.exists(fasta)) {stop("Cannot find fasta")}
   message(paste0("Reading fasta: ", fasta, "..."))
-  fa<-read.fasta(file = fasta,
+  fa<-seqinr::read.fasta(file = fasta,
                  seqtype = "DNA", as.string = TRUE, forceDNAtolower = FALSE,
                  set.attributes = TRUE)
   message("Fasta ingestion complete")
@@ -47,18 +59,19 @@ get_consensus<-function(fasta, splits = 10000, cores=1, genome="hg38"){
   allres<-lapply(1:length(fa), function(i){
     message(paste0("Processing ", nchar(fa[[i]][1]), " bases from ", names(fa)[i]))
     xs<-split_string(fa[[i]][1], splits)
-    res<-pbmcapply::pbmclapply(1:length(xs[[1]]), function(j){
+    res<-pbmcapply::pbmclapply(1:length(xs[[2]]), function(j){
       getconsensus( xs[[2]][j], xs[[1]][j])
     }, mc.cores = cores)
+    res<-unlist(res)
     if(length(res)>0){
-      df<-t(data.frame(strsplit(unlist(res), "_")))
+      df<-t(data.frame(strsplit(res, "_")))
       GenomicRanges::GRanges(seqnames = rep(names(fa)[i], nrow(df)),
                              ranges = IRanges::IRanges(start = as.numeric(df[,1]), end = as.numeric(df[,2])),
                              mcols = S4Vectors::DataFrame(sequence=df[,3]), seqinfo = seqinfo)
     }
   })
-  # suppressWarnings(unlist(as(allres, "GRangesList")))
-  unlist(as(allres, "GRangesList"))
+  allres <- do.call(c, allres)
+  GenomicRanges::GRangesList(allres)
 }
 
 #
