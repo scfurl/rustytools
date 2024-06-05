@@ -5,11 +5,12 @@ mod getconsensus;
 
 /// @export
 #[extendr]
-fn getconsensus(rstring: Robj, index_add: Robj)  {
+fn getconsensus(rstring: Robj, index_add: Robj) -> Robj {
     // let rstring = "NNNNNNNNATGCGTANNNNNNNTTGACNNNNNNNN".to_string();
     let rstring = rstring.as_str().unwrap().to_string();
     let index_add = *index_add.as_real_vector().unwrap().first().unwrap() as usize;
-    getconsensus::getconsensus(rstring, index_add);
+    let output = getconsensus::getconsensus(rstring, index_add);
+    output.into_iter().collect_robj()
 }
 
 // Macro to generate exports.

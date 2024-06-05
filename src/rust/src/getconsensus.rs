@@ -1,3 +1,5 @@
+// use std::process::Output;
+#![allow(unused_assignments)]
 
 #[derive(Debug)]
 struct NonNsubstring {
@@ -19,15 +21,14 @@ fn new_found(start: usize) -> Option<NonNsubstring> {
     })
 }
 
-fn close_found(n: Option<NonNsubstring>, end: usize, buff: & mut String) -> Option<NonNsubstring> {
+fn close_found(n: Option<NonNsubstring>, end: usize, buff: & mut String) -> (String, Option<NonNsubstring>) {
     let mut n = n.unwrap();
     n.end = Some(end);
     n.seq = Some(buff.to_string());
-    eprintln!("Start: {}; End: {}; Seq: {}", n.start.unwrap(), n.end.unwrap() - 1, n.seq.as_ref().unwrap());
-    None
+    (format!("{}_{}_{}", n.start.unwrap(), n.end.unwrap() - 1, n.seq.as_ref().unwrap()), None)
 }
 
-pub fn getconsensus(rstring: String, index_add: usize)  {
+pub fn getconsensus(rstring: String, index_add: usize) -> Vec<String> {
     // This function will be called from R.
     // It will take a string and print the coordinates of every repeated character substring made up of either "ACGT".
     let mut buff = "".to_string();
@@ -39,6 +40,8 @@ pub fn getconsensus(rstring: String, index_add: usize)  {
     // };
     let mut n: Option<NonNsubstring> = start_string();
     // eprintln!("String length {}", rstring.len().to_string());
+    let mut output: Vec<String> = Vec::new();
+    let mut ss = String::new();
     for i in 0..rstring.len() {
         let ch = rstring.chars().nth(i).unwrap();
         if (ch == 'A' || ch == 'C' || ch == 'G' || ch == 'T') && n.is_none() {
@@ -56,7 +59,8 @@ pub fn getconsensus(rstring: String, index_add: usize)  {
             continue;
         } else if n.is_some() && i == rstring.len() - 1 && (ch == 'A' || ch == 'C' || ch == 'G' || ch == 'T'){
             // eprintln!("Found the end of the string closing with a substring at index {}", i);
-            n = close_found(n, i + index_add, &mut buff);
+            (ss, n) = close_found(n, i + index_add, &mut buff);
+            output.push(ss);
             buff.clear();
             continue;
         } else if (ch != 'A' || ch != 'C' || ch != 'G' || ch != 'T') && n.is_some() {
@@ -64,7 +68,8 @@ pub fn getconsensus(rstring: String, index_add: usize)  {
             // n.unwrap().end = Some(i);
             // n.unwrap().seq = Some(buff.to_string());
             // buff.clear();
-            n = close_found(n, i + index_add, &mut buff);
+            (ss, n) = close_found(n, i + index_add, &mut buff);
+            output.push(ss);
             buff.clear();
             continue;
         } else {
@@ -72,4 +77,5 @@ pub fn getconsensus(rstring: String, index_add: usize)  {
             continue;
         }
     }
+    output
 }

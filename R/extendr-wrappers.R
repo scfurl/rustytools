@@ -12,7 +12,7 @@
 NULL
 
 #' @export
-getconsensus <- function(rstring, index_add) invisible(.Call(wrap__getconsensus, rstring, index_add))
+getconsensus <- function(rstring, index_add) .Call(wrap__getconsensus, rstring, index_add)
 
 
 # nolint end

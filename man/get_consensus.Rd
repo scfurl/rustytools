@@ -4,7 +4,7 @@
 \alias{get_consensus}
 \title{Get consensus}
 \usage{
-get_consensus(str)
+get_consensus(str, add_int)
 }
 \description{
 It will take a string and print the coordinates of every repeated character substring made up of either "ACGT".

@@ -12,9 +12,9 @@ roxygen2::roxygenise()
 rextendr::clean()
 rextendr::document()
 
-get_consensus("NNNNNNAATGNNNNGGGNNN")
-get_consensus("NNNnnnAATGaaaaGGGNNN")
-get_consensus("AATGNNNGGG")
+getconsensus("NNNNNNAATGNNNNGGGNNN", 0)
+getconsensus("NNNnnnAATGaaaaGGGNNN", 0)
+getconsensus("AATGNNNGGG", 0)
 
 
 # Run once to configure package to use pkgdown

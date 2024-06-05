@@ -30,46 +30,18 @@ suppressPackageStartupMessages({
   library(rustytools)
 })
 
-outpath<-"/tmp"
-root<-file.path(.libPaths(), "rustytools/extdata/test")
 ```
 
+## Get consensus from fasta
+
+This function will process a fasta file that has been processed using a tool such as samtools consensus.  The function will find all regions (subsequences) of the fasta that have sequence (A, C, T, G) and output a granges object containing the features and their sequences.  It is invoked as follows:
+
 ```{r}
-library(rextendr)
-library(seqinr)
-rust_sitrep()
-fa<-read.fasta(file = "/Volumes/furlan_s/primerseq/st_consensus/GENDX_HLA_Mix1_S1_L001_t1000.fa", 
-           seqtype = "DNA", as.string = TRUE, forceDNAtolower = FALSE,
-           set.attributes = TRUE)
-x<-fa[[1]][1]
-rm(fa)
-nchar(x)
-library(stringr)
-
-find_cuts<-function(len, n){
- cut<-ceiling(len/n)
- c(seq(1, len, by = cut), len)
-}
-
-# find_cuts(100030, 100)
-# find_cuts(nchar(x), 10000)
-
-split_string<-function(string, n){
-  cuts<-find_cuts(nchar(string), n)
-  string<-sapply(1:(length(cuts)-1), function(n){
-    substring(string, cuts[n], cuts[n+1])
-  })
-  return(list(cuts, string))
-}
-
-xs<-split_string(x, 10000)
-
-res<-pbmcapply::pbmclapply(1:length(xs[[1]]), function(n){
-  getconsensus( xs[[2]][n], xs[[1]][n])
-})
-
-
-
+fasta="~/Desktop/GENDX_HLA_Mix1_S1_L001_t1000.fa"
+tfasta="~/Desktop/test.fa"
+results<-get_consensus(tfasta, cores=1, split=1)
+results<-get_consensus(fasta, cores=1, split=10000)
+debug(get_consensus)
 ```
 
 ## Appendix
